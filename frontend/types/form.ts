@@ -1,50 +1,48 @@
-export type FormStatus = "draft" | "published"
+export type FormStatus = "draft" | "published";
 
-export type QuestionType = 
-    | "short_text"
-    | "long_text"
-    | "multiple_choice"
-    | "email"
-    | "dropdown"
-    | "number"
-    | "yes_no"
-    | "rating";
+export type QuestionType =
+  | "short_text"
+  | "long_text"
+  | "multiple_choice"
+  | "email"
+  | "dropdown"
+  | "number"
+  | "yes_no"
+  | "rating";
 
 export interface QuestionOption {
-    id: String,
-    label: String,
-    value: String,
-    order: number,
+  id: string;
+  label: string;
+  value: string;
+  order: number;
 }
 
 export interface Question {
-    id: String;
-    type: QuestionType;
+  id: string;
+  type: QuestionType;
 
-    title: String;
-    description?: String;
+  title: string;
+  description?: string;
 
-    required: boolean;
+  required: boolean;
 
-    placeholder?: String;
+  placeholder?: string;
 
-    order: number;
+  order: number;
 
-    options?: QuestionOption[];
+  options?: QuestionOption[];
 }
 
-
 export interface Form {
-    id: String;
-    
-    title: String;
-    description?: String;
+  id: string;
 
-    status: FormStatus;
-    
+  title: string;
+  description?: string;
 
-    questions: Question[];
+  status: FormStatus;
 
-    createdAt: String;
-    updatedAt: String;
+  questions: Question[];
+
+  createdAt: string;
+  updatedAt: string;
 }

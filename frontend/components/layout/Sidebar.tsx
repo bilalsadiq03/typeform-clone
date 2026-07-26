@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 import {
   LayoutDashboard,
-  FileText,
   CirclePlus,
   Settings,
 } from "lucide-react";
@@ -15,11 +14,6 @@ const navigation = [
     title: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-  },
-  {
-    title: "My Forms",
-    href: "/dashboard",
-    icon: FileText,
   },
   {
     title: "Create Form",
