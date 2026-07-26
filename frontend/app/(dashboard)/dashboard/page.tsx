@@ -1,12 +1,10 @@
-import AppShell from "@/components/ui/layout/AppShell";
 
 export default function DashboardPage() {
   return (
-    <AppShell>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">
-            Welcome back 👋
+            Welcome back
           </h1>
 
           <p className="text-muted-foreground">
@@ -28,6 +26,5 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </AppShell>
   );
 }
