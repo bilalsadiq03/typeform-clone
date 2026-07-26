@@ -1,0 +1,17 @@
+frontend/.next
+
+frontend/node_modules
+
+backend/venv
+
+backend/__pycache__
+
+.env
+
+.env.local
+
+*.db
+
+.idea
+
+.vscode
