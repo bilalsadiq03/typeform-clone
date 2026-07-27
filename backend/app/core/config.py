@@ -1,0 +1,30 @@
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+
+class Settings(BaseSettings):
+    app_name: str = "FormFlow API"
+    app_version: str = "1.0.0"
+    api_prefix: str = "/api"
+    database_url: str = f"sqlite:///{BASE_DIR / 'formflow.db'}"
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://your-vercel-app.vercel.app",
+    ]
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="FORMFLOW_",
+        extra="ignore",
+    )
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
