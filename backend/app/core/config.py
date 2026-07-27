@@ -6,6 +6,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
+cors_origins: list[str] = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
 
 class Settings(BaseSettings):
     app_name: str = "FormFlow API"
@@ -15,7 +20,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://your-vercel-app.vercel.app",
+        "https://typeform-clone-nine.vercel.app",
     ]
 
     model_config = SettingsConfigDict(
