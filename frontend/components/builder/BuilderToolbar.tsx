@@ -46,7 +46,7 @@ export default function BuilderToolbar() {
             Preview
           </Button>
 
-          <Button type="button" size="lg" onClick={publishForm}>
+          <Button type="button" size="lg" onClick={() => publishForm()}>
             <Send className="size-4" />
             {isPublished ? "Published" : "Publish"}
           </Button>

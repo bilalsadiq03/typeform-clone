@@ -16,7 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useBuilderStore } from "@/store/builder.store";
 import { cn } from "@/lib/utils";
-import { Question } from "@/types/form";
+import { Form, Question } from "@/types/form";
 
 type AnswerValue = string | number | boolean | null;
 type Answers = Record<string, AnswerValue>;
@@ -242,22 +242,61 @@ function QuestionField({
   }
 }
 
+function EmptyPreviewState({
+  formId,
+  title,
+  description,
+}: {
+  formId: string;
+  title: string;
+  description: string;
+}) {
+  const router = useRouter();
+
+  return (
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),rgba(241,245,249,0.92)_55%,rgba(226,232,240,0.95))] px-6 py-12 text-slate-900">
+      <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-[700px] flex-col items-center justify-center gap-6 text-center">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
+          Preview {formId}
+        </p>
+        <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
+          {title}
+        </h1>
+        <p className="text-lg text-slate-600">{description}</p>
+        <Button
+          type="button"
+          size="lg"
+          className="h-11 rounded-full px-6"
+          onClick={() => router.push("/dashboard")}
+        >
+          Back to Dashboard
+        </Button>
+      </div>
+    </main>
+  );
+}
+
 export default function FormExperience({ formId }: FormExperienceProps) {
   const router = useRouter();
-  const form = useBuilderStore((state) => state.form);
+  const forms = useBuilderStore((state) => state.forms);
+  const currentForm = useBuilderStore((state) => state.form);
+  const activeForm = useMemo<Form | null>(() => {
+    if (formId === "demo") {
+      return currentForm;
+    }
+
+    return forms.find((form) => form.id === formId) ?? null;
+  }, [currentForm, formId, forms]);
   const questions = useMemo(
-    () => [...form.questions].sort((a, b) => a.order - b.order),
-    [form.questions]
+    () => (activeForm ? [...activeForm.questions].sort((a, b) => a.order - b.order) : []),
+    [activeForm]
   );
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
-
   const hasQuestions = questions.length > 0;
-  const boundedIndex = hasQuestions
-    ? Math.min(currentIndex, questions.length - 1)
-    : 0;
+  const boundedIndex = hasQuestions ? Math.min(currentIndex, questions.length - 1) : 0;
   const currentQuestion = questions[boundedIndex];
   const currentValue = currentQuestion ? answers[currentQuestion.id] ?? null : null;
   const currentIsValid = currentQuestion
@@ -323,6 +362,16 @@ export default function FormExperience({ formId }: FormExperienceProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [boundedIndex, currentIsValid, hasQuestions, isLastQuestion, submitted]);
 
+  if (!activeForm) {
+    return (
+      <EmptyPreviewState
+        formId={formId}
+        title="Form not found"
+        description="This local form no longer exists in mock state."
+      />
+    );
+  }
+
   const handleAnswerChange = (nextValue: AnswerValue) => {
     if (!currentQuestion) {
       return;
@@ -359,27 +408,11 @@ export default function FormExperience({ formId }: FormExperienceProps) {
 
   if (!hasQuestions) {
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),rgba(241,245,249,0.92)_55%,rgba(226,232,240,0.95))] px-6 py-12 text-slate-900">
-        <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-[700px] flex-col items-center justify-center gap-6 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-            Preview {formId}
-          </p>
-          <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
-            This form has no questions yet
-          </h1>
-          <p className="text-lg text-slate-600">
-            Add a few questions in the builder, then open preview again.
-          </p>
-          <Button
-            type="button"
-            size="lg"
-            className="h-11 rounded-full px-6"
-            onClick={() => router.push("/dashboard")}
-          >
-            Back to Dashboard
-          </Button>
-        </div>
-      </main>
+      <EmptyPreviewState
+        formId={formId}
+        title="This form has no questions yet"
+        description="Add a few questions in the builder, then open preview again."
+      />
     );
   }
 
@@ -481,9 +514,7 @@ export default function FormExperience({ formId }: FormExperienceProps) {
                 onChange={handleAnswerChange}
               />
 
-              <div className="min-h-6 text-sm text-rose-600">
-                {currentMessage}
-              </div>
+              <div className="min-h-6 text-sm text-rose-600">{currentMessage}</div>
             </motion.section>
           </AnimatePresence>
         </div>
