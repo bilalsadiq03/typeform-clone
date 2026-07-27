@@ -1,4 +1,4 @@
-# FormFlow
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/40c23164-e9ae-4f58-9554-3da00e65c1c5" /># FormFlow
 
 **FormFlow** is a modern, production-quality form builder inspired by Typeform. It delivers a beautiful one-question-at-a-time public form experience, a drag-and-drop builder, a real-time dashboard, and a fully typed REST API — all out of the box.
 
@@ -62,11 +62,15 @@ FormFlow lets teams build beautiful, conversational forms without code. Forms ar
 
 ## Screenshots
 
-> _Screenshots coming soon. Run the app locally to see the full experience._
-
 | Dashboard | Form Builder | Public Form |
 |---|---|---|
-| _(placeholder)_ | _(placeholder)_ | _(placeholder)_ |
+| <img width="1901" height="1079" alt="Screenshot 2026-07-27 142021" src="https://github.com/user-attachments/assets/3cca0e20-9a9f-4d16-9406-bb6315624315" />
+ | <img width="1919" height="1079" alt="Screenshot 2026-07-27 142039" src="https://github.com/user-attachments/assets/7aee3fd4-6ecb-464d-a412-cee5c68d6a45" />
+ | <img width="1919" height="1077" alt="Screenshot 2026-07-27 142121" src="https://github.com/user-attachments/assets/07b1f5ed-3293-4e92-8c60-3a3288fd8ace" />
+ <img width="1917" height="1079" alt="Screenshot 2026-07-27 142137" src="https://github.com/user-attachments/assets/fb82eef6-d63b-4398-8f2c-1bc91307e028" />
+ <img width="1919" height="1078" alt="Screenshot 2026-07-27 142144" src="https://github.com/user-attachments/assets/f341b5d7-5ab0-4518-bb26-bc65726adf88" />
+![Uploading image.png…] ()
+|
 
 ---
 
@@ -285,7 +289,7 @@ All endpoints are prefixed with `/api`.
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/typeform-clone.git
+git clone https://github.com/bilalsadiq03/typeform-clone.git
 cd typeform-clone
 ```
 
