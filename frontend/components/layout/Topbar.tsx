@@ -10,12 +10,12 @@ import { useBuilderStore } from "@/store/builder.store";
 export default function Topbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const isDashboard = pathname === "/dashboard";
   const searchParams = useSearchParams();
   const resetBuilder = useBuilderStore((s) => s.resetBuilder);
 
 
-  const searchValue = searchParams.get("q") ?? "";
-  const isDashboard = pathname === "/dashboard";
+  const searchValue = isDashboard ? searchParams.get("q") ?? "" : "";
 
   const heading = useMemo(() => {
     if (isDashboard) {
@@ -34,6 +34,8 @@ export default function Topbar() {
   }, [isDashboard]);
 
   const handleSearchChange = (value: string) => {
+    if (!isDashboard) return;
+
     const nextParams = new URLSearchParams(searchParams.toString());
 
     if (value) {
