@@ -18,3 +18,4 @@ backend/__pycache__
 .vscode
 
 .cursor/
+backend/formflow.db

@@ -6,14 +6,15 @@ import { motion } from "framer-motion";
 import { Plus, Sparkles } from "lucide-react";
 import FormCard from "@/components/dashboard/FormCard";
 import { Button } from "@/components/ui/button";
-import { useBuilderStore } from "@/store/builder.store";
+import { useForms } from "@/hooks/useForms";
+import { useCreateForm } from "@/hooks/useCreateForm";
 
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const forms = useBuilderStore((state) => state.forms);
-  const createForm = useBuilderStore((state) => state.createForm);
+  const { data: forms = [], isLoading } = useForms();
   const query = (searchParams.get("q") ?? "").trim().toLowerCase();
+  const createMutation = useCreateForm();
 
   const filteredForms = useMemo(() => {
     if (!query) {
@@ -33,10 +34,31 @@ export default function DashboardPage() {
     });
   }, [forms, query]);
 
+  if (isLoading) {
+    return (
+      <div className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-72 animate-pulse rounded-3xl bg-slate-200"
+          />
+        ))}
+      </div>
+    );
+  }
+
   if (forms.length === 0) {
-    const handleCreateForm = () => {
-      createForm();
-      router.push("/forms/new");
+    const handleCreateForm = async () => {
+      try {
+        await createMutation.mutateAsync({
+          title: "Untitled Form",
+          description: "",
+        });
+
+        router.push("/forms/new");
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     return (

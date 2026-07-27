@@ -8,6 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from app.models.question import Question
+    from app.models.response import Response
 
 
 class FormBase(SQLModel):
@@ -36,3 +37,10 @@ class Form(FormBase, table=True):
             "order_by": "Question.order",
         },
     )
+
+    responses: list["Response"] = Relationship(
+    back_populates="form",
+    sa_relationship_kwargs={
+        "cascade": "all, delete-orphan",
+    },
+)

@@ -26,6 +26,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useBuilderStore } from "@/store/builder.store";
 import { Form } from "@/types/form";
 import { cn } from "@/lib/utils";
+import { useDeleteForm } from "@/hooks/useDeleteForm";
+import { useDuplicateForm } from "@/hooks/useDuplicateForm";
+import { usePublishForm } from "@/hooks/usePublishForm";
 
 interface FormCardProps {
   form: Form;
@@ -67,34 +70,33 @@ function getMockResponseCount(form: Form): number {
 export default function FormCard({ form, index }: FormCardProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const setCurrentForm = useBuilderStore((state) => state.setCurrentForm);
-  const duplicateForm = useBuilderStore((state) => state.duplicateForm);
-  const deleteForm = useBuilderStore((state) => state.deleteForm);
-  const publishForm = useBuilderStore((state) => state.publishForm);
+  const initializeForm = useBuilderStore((state) => state.initializeForm);
+  const deleteMutation = useDeleteForm();
+  const duplicateMutation = useDuplicateForm();
+  const publishMutation = usePublishForm();
   const responseCount = useMemo(() => getMockResponseCount(form), [form]);
 
   const handleEdit = () => {
-    setCurrentForm(form.id);
+    initializeForm(form);
     router.push("/forms/new");
   };
 
   const handlePreview = () => {
-    setCurrentForm(form.id);
     router.push(`/f/${form.id}`);
   };
 
   const handleDuplicate = () => {
-    duplicateForm(form.id);
+    duplicateMutation.mutate(form.id);
     setOpen(false);
   };
 
   const handleDelete = () => {
-    deleteForm(form.id);
+    deleteMutation.mutate(form.id);
     setOpen(false);
   };
 
   const handlePublish = () => {
-    publishForm(form.id);
+    publishMutation.mutate(form.id);
     setOpen(false);
   };
 

@@ -11,7 +11,8 @@ export default function Topbar() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const createForm = useBuilderStore((state) => state.createForm);
+  const resetBuilder = useBuilderStore((s) => s.resetBuilder);
+
 
   const searchValue = searchParams.get("q") ?? "";
   const isDashboard = pathname === "/dashboard";
@@ -46,7 +47,7 @@ export default function Topbar() {
   };
 
   const handleCreateForm = () => {
-    createForm();
+    resetBuilder();
     router.push("/forms/new");
   };
 

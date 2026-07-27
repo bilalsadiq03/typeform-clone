@@ -14,9 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useBuilderStore } from "@/store/builder.store";
+import { useForm } from "@/hooks/useForm";
 import { cn } from "@/lib/utils";
-import { Form, Question } from "@/types/form";
+import { Question } from "@/types/form";
+import { toast } from "sonner";
+import { useSubmitResponse } from "@/hooks/useSubmitResponse";
 
 type AnswerValue = string | number | boolean | null;
 type Answers = Record<string, AnswerValue>;
@@ -278,15 +280,8 @@ function EmptyPreviewState({
 
 export default function FormExperience({ formId }: FormExperienceProps) {
   const router = useRouter();
-  const forms = useBuilderStore((state) => state.forms);
-  const currentForm = useBuilderStore((state) => state.form);
-  const activeForm = useMemo<Form | null>(() => {
-    if (formId === "demo") {
-      return currentForm;
-    }
+  const { data: activeForm, isLoading } = useForm(formId);
 
-    return forms.find((form) => form.id === formId) ?? null;
-  }, [currentForm, formId, forms]);
   const questions = useMemo(
     () => (activeForm ? [...activeForm.questions].sort((a, b) => a.order - b.order) : []),
     [activeForm]
@@ -295,6 +290,7 @@ export default function FormExperience({ formId }: FormExperienceProps) {
   const [direction, setDirection] = useState(1);
   const [answers, setAnswers] = useState<Answers>({});
   const [submitted, setSubmitted] = useState(false);
+  const submitMutation = useSubmitResponse();
   const hasQuestions = questions.length > 0;
   const boundedIndex = hasQuestions ? Math.min(currentIndex, questions.length - 1) : 0;
   const currentQuestion = questions[boundedIndex];
@@ -362,12 +358,20 @@ export default function FormExperience({ formId }: FormExperienceProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [boundedIndex, currentIsValid, hasQuestions, isLastQuestion, submitted]);
 
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.9),rgba(241,245,249,0.92)_55%,rgba(226,232,240,0.95))] px-6 py-12 text-slate-900 flex items-center justify-center">
+        <div className="text-lg font-medium text-slate-500 animate-pulse">Loading form...</div>
+      </main>
+    );
+  }
+
   if (!activeForm) {
     return (
       <EmptyPreviewState
         formId={formId}
         title="Form not found"
-        description="This local form no longer exists in mock state."
+        description="This form could not be loaded from the server."
       />
     );
   }
@@ -392,19 +396,36 @@ export default function FormExperience({ formId }: FormExperienceProps) {
     setCurrentIndex((index) => index - 1);
   };
 
-  const handleNext = () => {
-    if (!currentQuestion || !currentIsValid) {
-      return;
-    }
+  const handleNext = async () => {
+  if (!currentQuestion || !currentIsValid) {
+    return;
+  }
 
-    if (isLastQuestion) {
+  if (isLastQuestion) {
+    try {
+      await submitMutation.mutateAsync({
+        form_id: activeForm.id,
+        answers: Object.entries(answers).map(([questionId, value]) => ({
+          question_id: questionId,
+          value: String(value ?? ""),
+        })),
+      });
+
+      toast.success("Response submitted");
+
       setSubmitted(true);
-      return;
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to submit response");
     }
 
-    setDirection(1);
-    setCurrentIndex((index) => index + 1);
-  };
+    return;
+  }
+
+  setDirection(1);
+
+  setCurrentIndex((index) => index + 1);
+};
 
   if (!hasQuestions) {
     return (

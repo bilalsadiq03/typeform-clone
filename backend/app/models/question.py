@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
+from sqlalchemy import Column, JSON
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -15,6 +16,8 @@ class QuestionBase(SQLModel):
     description: str | None = None
     required: bool = False
     order: int = Field(default=1, ge=1)
+    placeholder: str | None = None
+    options: list[dict[str, Any]] = Field(default_factory=list, sa_column=Column(JSON))
 
 
 class Question(QuestionBase, table=True):

@@ -17,6 +17,19 @@ class QuestionRead(BaseModel):
     description: str | None = None
     required: bool
     order: int
+    placeholder: str | None = None
+    options: list[dict] = Field(default_factory=list)
+
+
+class QuestionUpdate(BaseModel):
+    id: UUID | None = None
+    type: str
+    title: str
+    description: str | None = None
+    required: bool = False
+    order: int
+    placeholder: str | None = None
+    options: list[dict] = Field(default_factory=list)
 
 
 class FormCreate(BaseModel):
@@ -30,6 +43,7 @@ class FormUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = None
     status: str | None = None
+    questions: list[QuestionUpdate] | None = None
 
 
 class FormRead(BaseModel):

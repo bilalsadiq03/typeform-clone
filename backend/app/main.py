@@ -6,8 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.forms import router as forms_router
 from app.core.config import get_settings
 from app.database.db import init_db
-from app.models.form import Form
-from app.models.question import Question
+from app.api.responses import router as responses_router
 
 
 settings = get_settings()
@@ -34,6 +33,10 @@ app.add_middleware(
 )
 
 app.include_router(forms_router, prefix=settings.api_prefix)
+app.include_router(
+    responses_router,
+    prefix=settings.api_prefix,
+)
 
 
 @app.get("/")

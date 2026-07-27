@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime, timezone
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import selectinload
@@ -68,6 +68,22 @@ class FormService:
         if "status" in update_data and update_data["status"] is not None:
             form.status = self._validate_status(update_data["status"])
 
+        if "questions" in update_data and update_data["questions"] is not None:
+            form.questions.clear()
+            for q_data in update_data["questions"]:
+                question = Question(
+                    id=q_data.get("id") or uuid4(),
+                    form_id=form.id,
+                    type=q_data["type"],
+                    title=q_data["title"],
+                    description=q_data.get("description"),
+                    required=q_data.get("required", False),
+                    order=q_data["order"],
+                    placeholder=q_data.get("placeholder"),
+                    options=q_data.get("options") or [],
+                )
+                form.questions.append(question)
+
         form.updated_at = self._timestamp()
         self.session.add(form)
         self.session.commit()
@@ -99,6 +115,8 @@ class FormService:
                     description=question.description,
                     required=question.required,
                     order=question.order,
+                    placeholder=question.placeholder,
+                    options=question.options,
                 )
             )
 
