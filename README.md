@@ -1,5 +1,3 @@
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/40c23164-e9ae-4f58-9554-3da00e65c1c5" /># FormFlow
-
 **FormFlow** is a modern, production-quality form builder inspired by Typeform. It delivers a beautiful one-question-at-a-time public form experience, a drag-and-drop builder, a real-time dashboard, and a fully typed REST API — all out of the box.
 
 ---
