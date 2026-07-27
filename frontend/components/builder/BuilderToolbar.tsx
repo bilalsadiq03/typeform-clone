@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { useBuilderStore } from "@/store/builder.store";
 import { Eye, Send } from "lucide-react";
 
 export default function BuilderToolbar() {
+  const router = useRouter();
   const { form, setTitle, publishForm } = useBuilderStore();
   const isPublished = form.status === "published";
 
@@ -34,7 +36,12 @@ export default function BuilderToolbar() {
         </div>
 
         <div className="flex items-center gap-2 self-start md:self-auto">
-          <Button type="button" variant="outline" size="lg">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => router.push("/f/demo")}
+          >
             <Eye className="size-4" />
             Preview
           </Button>
