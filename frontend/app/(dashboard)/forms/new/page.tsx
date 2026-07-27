@@ -25,7 +25,9 @@ export default function NewFormPage() {
           title: backendForm.title,
           description: backendForm.description ?? "",
           status: backendForm.status,
+          slug: backendForm.slug,
           questions: [],
+          responseCount: backendForm.responseCount,
           createdAt: backendForm.createdAt,
           updatedAt: backendForm.updatedAt,
         });

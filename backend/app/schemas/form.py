@@ -53,6 +53,7 @@ class FormRead(BaseModel):
     title: str
     description: str | None = None
     status: str
+    response_count: int = 0
     slug: str
     created_at: datetime
     updated_at: datetime

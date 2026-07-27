@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -63,10 +63,6 @@ function formatUpdatedTime(updatedAt: string): string {
   });
 }
 
-function getMockResponseCount(form: Form): number {
-  return form.id.split("").reduce((total, character) => total + character.charCodeAt(0), 0) % 148;
-}
-
 export default function FormCard({ form, index }: FormCardProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -74,7 +70,6 @@ export default function FormCard({ form, index }: FormCardProps) {
   const deleteMutation = useDeleteForm();
   const duplicateMutation = useDuplicateForm();
   const publishMutation = usePublishForm();
-  const responseCount = useMemo(() => getMockResponseCount(form), [form]);
 
   const handleEdit = () => {
     initializeForm(form);
@@ -214,7 +209,7 @@ export default function FormCard({ form, index }: FormCardProps) {
                 Responses
               </p>
               <p className="mt-2 text-2xl font-semibold text-slate-950">
-                {responseCount}
+                {form.responseCount}
               </p>
             </div>
           </div>

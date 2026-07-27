@@ -1,18 +1,27 @@
 import { api } from "./client";
-import type { Form, Question, QuestionType } from "@/types/form";
-import type { Question as BuilderQuestion } from "@/types/form";
+import type { Form, Question } from "@/types/form";
+
+// ---------------------------------------------------------------------------
+// API DTOs — shape of the raw JSON returned by the FastAPI backend.
+// These are kept lightweight; only fields that differ from the frontend model
+// (snake_case vs camelCase, or extra backend-only fields) are listed here.
+// ---------------------------------------------------------------------------
 
 export interface ApiQuestion extends Question {
   form_id: string;
 }
 
 export interface ApiForm
-  extends Omit<Form, "questions" | "createdAt" | "updatedAt"> {
-  slug: string;
+  extends Omit<Form, "questions" | "createdAt" | "updatedAt" | "responseCount"> {
+  response_count: number;
   created_at: string;
   updated_at: string;
   questions: ApiQuestion[];
 }
+
+// ---------------------------------------------------------------------------
+// Payloads
+// ---------------------------------------------------------------------------
 
 export interface CreateFormPayload {
   title: string;
@@ -23,18 +32,12 @@ export interface UpdateFormPayload {
   title?: string;
   description?: string;
   status?: "draft" | "published";
-  questions?: BuilderQuestion[];
+  questions?: Question[];
 }
 
-export interface ApiQuestion extends Question {
-  form_id: string;
-}
-
-export interface ApiForm extends Omit<Form, "questions" | "createdAt" | "updatedAt"> {
-  created_at: string;
-  updated_at: string;
-  question: ApiQuestion[];
-}
+// ---------------------------------------------------------------------------
+// Mapper — converts an API DTO into the canonical frontend Form model.
+// ---------------------------------------------------------------------------
 
 function mapForm(form: ApiForm): Form {
   return {
@@ -42,11 +45,17 @@ function mapForm(form: ApiForm): Form {
     title: form.title,
     description: form.description,
     status: form.status,
+    slug: form.slug,
     questions: form.questions,
+    responseCount: form.response_count,
     createdAt: form.created_at,
     updatedAt: form.updated_at,
   };
 }
+
+// ---------------------------------------------------------------------------
+// API functions
+// ---------------------------------------------------------------------------
 
 export async function getForms(): Promise<Form[]> {
   const { data } = await api.get<ApiForm[]>("/forms");
@@ -63,7 +72,7 @@ export async function createForm(payload: CreateFormPayload): Promise<Form> {
   return mapForm(data);
 }
 
-export async function deleteForm(id: string) {
+export async function deleteForm(id: string): Promise<void> {
   await api.delete(`/forms/${id}`);
 }
 

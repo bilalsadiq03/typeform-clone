@@ -55,15 +55,6 @@ export default function Sidebar() {
           );
         })}
       </nav>
-
-      <div className="mt-auto rounded-[1.75rem] border border-slate-200 bg-slate-50/80 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-          Local Mode
-        </p>
-        <p className="mt-3 text-sm leading-6 text-slate-600">
-          Dashboard, builder, and preview are all running on local Zustand state with no backend dependency.
-        </p>
-      </div>
     </aside>
   );
 }

@@ -41,7 +41,11 @@ export interface Form {
 
   status: FormStatus;
 
+  slug: string;
+
   questions: Question[];
+
+  responseCount: number;
 
   createdAt: string;
   updatedAt: string;

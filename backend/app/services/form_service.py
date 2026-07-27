@@ -10,22 +10,69 @@ from sqlmodel import Session, select
 
 from app.models.form import Form
 from app.models.question import Question
-from app.schemas.form import FormCreate, FormUpdate, VALID_FORM_STATUSES
+from app.schemas.form import FormCreate, FormRead, FormUpdate, VALID_FORM_STATUSES
 
 
 class FormService:
     def __init__(self, session: Session):
         self.session = session
 
-    def list_forms(self) -> list[Form]:
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    def _load_form(self, form_id: UUID) -> Form:
+        """Fetch a single Form with questions and responses eagerly loaded."""
         statement = (
             select(Form)
-            .options(selectinload(Form.questions))
+            .where(Form.id == form_id)
+            .options(
+                selectinload(Form.questions),
+                selectinload(Form.responses),
+            )
+        )
+        form = self.session.exec(statement).first()
+        if not form:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Form not found.",
+            )
+        return form
+
+    @staticmethod
+    def _to_read(form: Form) -> FormRead:
+        """Serialize an ORM Form into a FormRead schema, populating response_count."""
+        return FormRead.model_validate(
+            {
+                "id": form.id,
+                "title": form.title,
+                "description": form.description,
+                "status": form.status,
+                "slug": form.slug,
+                "created_at": form.created_at,
+                "updated_at": form.updated_at,
+                "questions": form.questions,
+                "response_count": len(form.responses),
+            }
+        )
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
+
+    def list_forms(self) -> list[FormRead]:
+        statement = (
+            select(Form)
+            .options(
+                selectinload(Form.questions),
+                selectinload(Form.responses),
+            )
             .order_by(Form.updated_at.desc())
         )
-        return list(self.session.exec(statement).all())
+        forms = list(self.session.exec(statement).all())
+        return [self._to_read(f) for f in forms]
 
-    def create_form(self, payload: FormCreate) -> Form:
+    def create_form(self, payload: FormCreate) -> FormRead:
         status_value = self._validate_status(payload.status)
         form = Form(
             title=payload.title.strip(),
@@ -35,21 +82,15 @@ class FormService:
         )
         self.session.add(form)
         self.session.commit()
-        self.session.refresh(form)
-        return form
+        form = self._load_form(form.id)
+        return self._to_read(form)
 
-    def get_form(self, form_id: UUID) -> Form:
-        statement = select(Form).where(Form.id == form_id).options(selectinload(Form.questions))
-        form = self.session.exec(statement).first()
-        if not form:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Form not found.",
-            )
-        return form
+    def get_form(self, form_id: UUID) -> FormRead:
+        form = self._load_form(form_id)
+        return self._to_read(form)
 
-    def update_form(self, form_id: UUID, payload: FormUpdate) -> Form:
-        form = self.get_form(form_id)
+    def update_form(self, form_id: UUID, payload: FormUpdate) -> FormRead:
+        form = self._load_form(form_id)
         update_data = payload.model_dump(exclude_unset=True)
 
         if not update_data:
@@ -87,27 +128,24 @@ class FormService:
         form.updated_at = self._timestamp()
         self.session.add(form)
         self.session.commit()
-        self.session.refresh(form)
-        self.session.exec(
-            select(Form).where(Form.id == form.id).options(selectinload(Form.questions))
-        ).first()
-        return form
+        form = self._load_form(form.id)
+        return self._to_read(form)
 
     def delete_form(self, form_id: UUID) -> None:
-        form = self.get_form(form_id)
+        form = self._load_form(form_id)
         self.session.delete(form)
         self.session.commit()
 
-    def duplicate_form(self, form_id: UUID) -> Form:
-        form = self.get_form(form_id)
+    def duplicate_form(self, form_id: UUID) -> FormRead:
+        original = self._load_form(form_id)
         duplicated_form = Form(
-            title=f"{form.title} (copy)",
-            description=form.description,
+            title=f"{original.title} (copy)",
+            description=original.description,
             status="draft",
-            slug=self._generate_unique_slug(f"{form.slug}-copy"),
+            slug=self._generate_unique_slug(f"{original.slug}-copy"),
         )
 
-        for question in form.questions:
+        for question in original.questions:
             duplicated_form.questions.append(
                 Question(
                     type=question.type,
@@ -122,23 +160,21 @@ class FormService:
 
         self.session.add(duplicated_form)
         self.session.commit()
-        self.session.exec(
-            select(Form)
-            .where(Form.id == duplicated_form.id)
-            .options(selectinload(Form.questions))
-        ).first()
-        return duplicated_form
+        duplicated_form = self._load_form(duplicated_form.id)
+        return self._to_read(duplicated_form)
 
-    def publish_form(self, form_id: UUID) -> Form:
-        form = self.get_form(form_id)
+    def publish_form(self, form_id: UUID) -> FormRead:
+        form = self._load_form(form_id)
         form.status = "published"
         form.updated_at = self._timestamp()
         self.session.add(form)
         self.session.commit()
-        self.session.exec(
-            select(Form).where(Form.id == form.id).options(selectinload(Form.questions))
-        ).first()
-        return form
+        form = self._load_form(form.id)
+        return self._to_read(form)
+
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
 
     def _validate_status(self, status_value: str) -> str:
         normalized = status_value.strip().lower()
